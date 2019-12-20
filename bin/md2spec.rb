@@ -1,6 +1,11 @@
 #!/usr/bin/env ruby
 
 def main
+  unless ARGV.length == 1
+    puts 'example: md2spec.rb sample.md'
+    exit
+  end
+
   md_file = ARGV[0]
 
   st = SpecTree.new
@@ -97,8 +102,10 @@ class Node
       indent + decorated_text,
       children.map(&:to_spec),
       comment? ? nil : indent + 'end'
-    ].compact
+    ].flatten.compact.join("\n")
   end
 end
 
-main
+if $0 == __FILE__ then
+  main
+end
