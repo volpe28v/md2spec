@@ -54,11 +54,20 @@ class Node
     @text = text
     @parent = nil
     @children = []
+
+    parse
+  end
+
+  def parse
+    matched = @text.match(/^([ ]*)-[ ]*((.+):)?[ ]*(.+)$/)
+    @spaces = matched[1]
+    @symbol = matched[3]
+    @body = matched[4]
   end
 
   def level
     # とりあえず markdown のインデントは4を想定
-    text.match(/^([ ]*-)/)[0].length / 4
+    @spaces.length / 4
   end
 
   def indent
@@ -67,23 +76,20 @@ class Node
   end
 
   def decorated_text
-    matched = text.match(/^[ ]*-[ ]*((.+):)?[ ]*(.+)$/)
-
-    case matched[2]
+    case @symbol
     when 'd'
-      "describe '#{matched[3]}' do"
+      "describe '#{@body}' do"
     when 'c'
-      "context '#{matched[3]}' do"
+      "context '#{@body}' do"
     when 'i'
-      "xit '#{matched[3]}' do"
+      "xit '#{@body}' do"
     else
-      "# #{matched[3]}"
+      "# #{@body}"
     end
   end
 
   def comment?
-    matched = text.match(/^[ ]*-[ ]*((.+):)?[ ]*(.+)$/)
-    matched[2].nil?
+    @symbol.nil?
   end
 
   def to_spec
