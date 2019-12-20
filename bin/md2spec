@@ -1,12 +1,14 @@
-def main
-  st = SpecTree.new
+#!/usr/bin/env ruby
 
-  File.foreach("sample.md"){|line|
+def main
+  md_file = ARGV[0]
+
+  st = SpecTree.new
+  File.foreach(md_file) do |line|
     st.add(line)
-  }
+  end
 
   puts st.to_spec
-
 end
 
 class SpecTree
@@ -16,7 +18,6 @@ class SpecTree
 
   def add(line)
     node = Node.new(line)
-    p node.level
 
     last_node = @nodes.last
     @nodes << node
@@ -42,8 +43,7 @@ class SpecTree
   end
 
   def to_spec
-    @nodes.first.print
-
+    @nodes.first.to_spec
   end
 end
 
@@ -52,15 +52,18 @@ class Node
 
   def initialize(text)
     @text = text
+    @parent = nil
     @children = []
   end
 
   def level
+    # とりあえず markdown のインデントは4を想定
     text.match(/^([ ]*-)/)[0].length / 4
   end
 
   def indent
-    ' ' * level * 4
+    # spec に書き出すインデントは2
+    ' ' * level * 2
   end
 
   def decorated_text
@@ -72,7 +75,7 @@ class Node
     when 'c'
       "context '#{matched[3]}' do"
     when 'i'
-      "it '#{matched[3]}' do"
+      "xit '#{matched[3]}' do"
     else
       "# #{matched[3]}"
     end
@@ -83,14 +86,13 @@ class Node
     matched[2].nil?
   end
 
-  def print
+  def to_spec
     [
       indent + decorated_text,
-      children.map(&:print),
+      children.map(&:to_spec),
       comment? ? nil : indent + 'end'
     ].compact
   end
 end
-
 
 main
