@@ -29,26 +29,23 @@ class SpecTree
 
     unless last_node.nil?
       if last_node.level < node.level
-        last_node.children << node
-        node.parent = last_node
+        last_node.add_child(node)
       elsif last_node.level == node.level
-        parent = last_node.parent
-        unless parent.nil?
-          parent.children << node
-          node.parent = parent
-        end
+        last_node.parent&.add_child(node)
       else
-        parent = @nodes.select {|n| n.level < node.level}&.last
-        unless parent.nil?
-          parent.children << node
-          node.parent = parent
-        end
+        close_parent(node)&.add_child(node)
       end
     end
   end
 
   def to_spec
     @nodes.first.to_spec
+  end
+
+  private
+
+  def close_parent(node)
+    @nodes.select {|n| n.level < node.level}.last
   end
 end
 
@@ -68,6 +65,11 @@ class Node
     @spaces = matched[1]
     @symbol = matched[3]
     @body = matched[4]
+  end
+
+  def add_child(node)
+    children << node
+    node.parent = self
   end
 
   def level
