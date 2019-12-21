@@ -74,7 +74,7 @@ class Node
     [
       indent + converted_text,
       children.map(&:to_spec),
-      comment? ? nil : indent + 'end'
+      comment? ? nil : indent + terminal_symbol
     ].flatten.compact.join("\n")
   end
 
@@ -92,6 +92,11 @@ class Node
     ' ' * level * 2
   end
 
+  def comment?
+    @symbol.nil?
+  end
+
+  # 多言語化したい場合は以下をオーバーライド
   def converted_text
     return "# #{@body}" if comment?
 
@@ -111,8 +116,8 @@ class Node
     end
   end
 
-  def comment?
-    @symbol.nil?
+  def terminal_symbol
+    'end'
   end
 end
 
