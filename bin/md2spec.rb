@@ -27,15 +27,7 @@ class SpecTree
     last_node = @nodes.last
     @nodes << node
 
-    unless last_node.nil?
-      if last_node.level < node.level
-        last_node.add_child(node)
-      elsif last_node.level == node.level
-        last_node.parent&.add_child(node)
-      else
-        close_parent(node)&.add_child(node)
-      end
-    end
+    set_relationship(last_node, node)
   end
 
   def to_spec
@@ -43,6 +35,18 @@ class SpecTree
   end
 
   private
+
+  def set_relationship(last_node, node)
+    return if last_node.nil?
+
+    if last_node.level < node.level
+      last_node.add_child(node)
+    elsif last_node.level == node.level
+      last_node.parent&.add_child(node)
+    else
+      close_parent(node)&.add_child(node)
+    end
+  end
 
   def close_parent(node)
     @nodes.select {|n| n.level < node.level}.last
