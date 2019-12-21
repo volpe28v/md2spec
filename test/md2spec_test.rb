@@ -132,4 +132,33 @@ class TestSpecTree < Test::Unit::TestCase
     ].join("\n")
     assert_equal expect, st.to_spec
   end
+
+  def test_feature_scenario
+    st = SpecTree.new
+    st.add("- f: hoge")
+    st.add("    - c: fuga")
+    st.add("        - s: this is scenario")
+    st.add("            - this is comment1")
+    st.add("            - this is comment2")
+    st.add("    - c: fuga2")
+    st.add("        - s: this is scenario2")
+    st.add("            - this is comment1")
+
+    expect = [
+      "feature 'hoge', type: :feature do",
+      "  context 'fuga' do",
+      "    xscenario 'this is scenario' do",
+      "      # this is comment1",
+      "      # this is comment2",
+      "    end",
+      "  end",
+      "  context 'fuga2' do",
+      "    xscenario 'this is scenario2' do",
+      "      # this is comment1",
+      "    end",
+      "  end",
+      "end"
+    ].join("\n")
+    assert_equal expect, st.to_spec
+  end
 end

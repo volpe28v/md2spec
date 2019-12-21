@@ -50,7 +50,7 @@ class SpecTree
 end
 
 class Node
-  attr_accessor :text, :parent, :children
+  attr_accessor :parent, :children
 
   def initialize(text)
     @text = text
@@ -90,6 +90,10 @@ class Node
       "context '#{@body}' do"
     when 'i'
       "xit '#{@body}' do"
+    when 'f'
+      "feature '#{@body}', type: :feature do"
+    when 's'
+      "xscenario '#{@body}' do"
     else
       "# #{@body}"
     end
