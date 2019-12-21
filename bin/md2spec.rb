@@ -60,13 +60,6 @@ class Node
     parse
   end
 
-  def parse
-    matched = @text.match(/^([ ]*)-[ ]*((.+):)?[ ]*(.+)$/)
-    @spaces = matched[1]
-    @symbol = matched[3]
-    @body = matched[4]
-  end
-
   def add_child(node)
     children << node
     node.parent = self
@@ -77,12 +70,31 @@ class Node
     @spaces.length / 4
   end
 
+  def to_spec
+    [
+      indent + converted_text,
+      children.map(&:to_spec),
+      comment? ? nil : indent + 'end'
+    ].flatten.compact.join("\n")
+  end
+
+  protected
+
+  def parse
+    matched = @text.match(/^([ ]*)-[ ]*((.+):)?[ ]*(.+)$/)
+    @spaces = matched[1]
+    @symbol = matched[3]
+    @body = matched[4]
+  end
+
   def indent
     # spec に書き出すインデントは2
     ' ' * level * 2
   end
 
-  def decorated_text
+  def converted_text
+    return "# #{@body}" if comment?
+
     case @symbol
     when 'd'
       "describe '#{@body}' do"
@@ -95,20 +107,12 @@ class Node
     when 's'
       "xscenario '#{@body}' do"
     else
-      "# #{@body}"
+      raise "Invalid symbol '#{@symbol}'"
     end
   end
 
   def comment?
     @symbol.nil?
-  end
-
-  def to_spec
-    [
-      indent + decorated_text,
-      children.map(&:to_spec),
-      comment? ? nil : indent + 'end'
-    ].flatten.compact.join("\n")
   end
 end
 
